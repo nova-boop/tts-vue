@@ -21,8 +21,7 @@ jobs:
 
     strategy:
       matrix:
-        # [macos-latest, ubuntu-latest, windows-latest]
-        os: [macos-latest]
+        os: [ubuntu-latest]  # 修改为 Linux
 
     steps:
       - name: Checkout Code
@@ -46,6 +45,6 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: tts-vue-${{ matrix. os }}
-          path: release/*/*.dmg
+          name: tts-vue-${{ matrix.os }}
+          path: release/*/*.AppImage
           retention-days: 30

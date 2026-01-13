@@ -16,27 +16,20 @@ const { t } = useI18n()
 const Store = require('electron-store')
 const store = new Store()
 const axios = require('axios')
+const semver = require('semver')
 
 const updateNotification = store.get('updateNotification')
 const version = pkg.version
 const getLatestVsersion = async () => {
   let data = {}
-  let latestVsersion = await axios
-    .get('https://gitee.com/api/v5/repos/LGW_space/tts-vue/releases/latest')
-    .catch((e: any) => {
-      console.log(e)
-    })
-  if (typeof latestVsersion == 'undefined') {
-    latestVsersion = await axios.get('https://api.github.com/repos/LokerL/tts-vue/releases/latest')
-  }
+  let latestVsersion = await axios.get('https://api.github.com/repos/nova-boop/tts-vue/releases/latest')
   return {
     latestVsersion: latestVsersion.data
-    // github: latestVsersion_GitHub.data,
   }
 }
 let hasUpdate = ref(false)
 getLatestVsersion().then(({ latestVsersion }) => {
-  if (version != latestVsersion.tag_name) {
+  if (semver.lt(version, latestVsersion.tag_name)) {
     hasUpdate.value = true
     if (updateNotification) {
       ElNotification({
@@ -48,7 +41,7 @@ getLatestVsersion().then(({ latestVsersion }) => {
             h(
               'a',
               {
-                href: 'https://gitee.com/LGW_space/tts-vue/releases/latest',
+                href: 'https://github.com/nova-boop/tts-vue/releases/latest',
                 target: '_blank',
                 style: 'margin-bottom: 20px;'
               },
@@ -68,7 +61,7 @@ const checkUpdate = async () => {
     let versionInfo = ''
     if (version == latestVsersion.tag_name) {
       versionInfo = `<p class="version-info version-info-success">${t('version.noUpdate')}</p>`
-    } else {
+    } else if (semver.lt(version, latestVsersion.tag_name)) {
       versionInfo = `<p class="version-info version-info-warning">${t('version.updateAvailable')}</p>`
     }
     const htmlMsg = `
@@ -78,7 +71,7 @@ const checkUpdate = async () => {
         <p>${t('version.latestVersion')}<span>${latestVsersion.tag_name}</span></p>
         <p>${t('version.downloadLinks')}:
           <ul style="margin: 0;">
-            <li><a href="https://github.com/LokerL/tts-vue/releases/latest" target="_blank">GitHub</a></li>
+            <li><a href="https://github.com/nova-boop/tts-vue/releases/latest" target="_blank">GitHub</a></li>
             <li><a href="https://gitee.com/LGW_space/tts-vue/releases/latest" target="_blank">Gitee</a></li>
             <li><a href="https://wwn.lanzoul.com/b0f3ype9g" target="_blank">lanzou云</a> 密码：em1n</li>
           </ul>

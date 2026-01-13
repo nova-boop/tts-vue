@@ -8,6 +8,12 @@
 
 - [安装运行](https://loker-page.lgwawork.com/guide/install.html)
 
+- > node version: v18.20.8
+- > yarn add fluent-ffmpeg
+- > yarn  install
+- > yarn dev
+- > yarn build
+
 - [功能介绍](https://loker-page.lgwawork.com/guide/features.html)
 
 - [常见问题](https://loker-page.lgwawork.com/guide/qa.html)

@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp,h } from 'vue'
 import App from './App.vue'
 import { globalRegister } from './global'
 import { createPinia } from 'pinia'
@@ -11,7 +11,9 @@ import i18n from './assets/i18n/i18n'
 //     return { t } // return render context that included `t`
 //   }
 // }
-const app = createApp(App) as any
+const app = createApp({
+  render: () => h(App),
+});
 const pinia = createPinia()
 
 app.use(i18n)
