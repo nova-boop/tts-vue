@@ -42,15 +42,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: List Release Directory
-        run: ls -R release
+      - name: Get Release Directory Name
+        id: get_release_dir
+        run: |
+          echo "RELEASE_DIR=$(basename $(ls -d release/*))" >> $GITHUB_ENV  # 提取目录名称并设置环境变量
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: 'tts-vue-${{ matrix.os }}'  # 使用 OS 版本名作为 tag
-          release_name: 'Release v${{ matrix.os }}'  # 自定义发布名称
+          tag_name: 'release-${{ env.RELEASE_DIR }}'
+          release_name: 'Release v${{ env.RELEASE_DIR }}'
           draft: false
           prerelease: false
         env:
@@ -61,7 +63,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/*.exe
+          asset_path: release/*/*.exe
           asset_name: tts-vue-windows.exe
           asset_content_type: application/octet-stream
 
@@ -70,7 +72,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/*.dmg
+          asset_path: release/*/*.dmg
           asset_name: tts-vue-macos.dmg
           asset_content_type: application/octet-stream
 
@@ -79,6 +81,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/*.AppImage
+          asset_path: release/*/*.AppImage
           asset_name: tts-vue-linux.AppImage
           asset_content_type: application/octet-stream
