@@ -11,7 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        # os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
 
     # 这里的 outputs 用于将 Linux 阶段提取到的版本号传递给下一个 Job
     outputs:
@@ -94,7 +95,7 @@ jobs:
             
             ---
             ### 📦 包含平台
-            - Windows (.exe)
+            - X Windows (.exe)
             - macOS (.dmg)
             - Linux (.AppImage)
             
