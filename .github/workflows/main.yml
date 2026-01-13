@@ -48,7 +48,8 @@ jobs:
       - name: Get Release Directory Name
         id: get_release_dir
         run: |
-          echo "RELEASE_DIR=$(basename $(ls -d release/*))" >> $GITHUB_ENV
+          RELEASE_DIR=$(basename $(ls -d release/*))
+          echo "RELEASE_DIR=${RELEASE_DIR}" >> $GITHUB_ENV  
           cat ${{ env.RELEASE_DIR }}
 
       - name: Create Release
