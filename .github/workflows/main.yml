@@ -51,8 +51,8 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         with:
-          tag_name: 'release-${{ env.RELEASE_DIR }}'
-          release_name: 'Release v${{ env.RELEASE_DIR }}'
+          tag_name: 'release-${{ github.run_id }}-v${{ env.RELEASE_DIR }}'
+          release_name: 'release-${{ github.run_id }}-v${{ env.RELEASE_DIR }}'
           draft: false
           prerelease: false
         env:
