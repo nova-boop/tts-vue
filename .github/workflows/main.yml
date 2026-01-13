@@ -1,33 +1,25 @@
-name: Build
+name: Build and Release
 
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "**.spec.js"
-      - ".idea"
-      - ".vscode"
-      - ".dockerignore"
-      - "Dockerfile"
-      - ".gitignore"
-      - ".github/**"
-      - "!.github/workflows/main.yml"
   workflow_dispatch:
 
 jobs:
   build:
+    name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
 
+    # 这里的 outputs 用于将 Linux 阶段提取到的版本号传递给下一个 Job
+    outputs:
+      release_version: ${{ steps.get_release_dir.outputs.VERSION }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -37,55 +29,62 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Release Files
+      - name: Build Project
         run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: List Release Directory
-        run: ls -R release
-
+      # 仅在 Ubuntu 运行时提取版本号，并设为 Job 输出变量
       - name: Get Release Directory Name
         id: get_release_dir
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
         run: |
-          RELEASE_DIR=$(basename $(ls -d release/*))
-          echo "RELEASE_DIR=${RELEASE_DIR}" >> $GITHUB_ENV  
-          cat ${{ env.RELEASE_DIR }}
+          # 假设 release 目录下只有一个版本号命名的文件夹
+          RELEASE_DIR=$(basename $(ls -d release/*/ | head -n 1))
+          echo "VERSION=$RELEASE_DIR" >> $GITHUB_OUTPUT
+          echo "Detected Version: $RELEASE_DIR"
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Upload Temp Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: 'release-${{ github.run_id }}-v${{ env.RELEASE_DIR }}'
-          release_name: 'release-${{ github.run_id }}-v${{ env.RELEASE_DIR }}'
+          name: build-artifacts-${{ matrix.os }}
+          path: |
+            release/**/*.exe
+            release/**/*.dmg
+            release/**/*.AppImage
+          retention-days: 1
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./downloads
+
+      - name: Prepare Assets
+        run: |
+          mkdir ./assets
+          find ./downloads -name "*.exe" -exec cp {} ./assets/ \;
+          find ./downloads -name "*.dmg" -exec cp {} ./assets/ \;
+          find ./downloads -name "*.AppImage" -exec cp {} ./assets/ \;
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # 使用来自上一个 Job 的输出变量作为 Tag
+          tag_name: v${{ needs.build.outputs.release_version }}
+          name: Release v${{ needs.build.outputs.release_version }}
           draft: false
           prerelease: false
+          files: |
+            ./assets/*.exe
+            ./assets/*.dmg
+            ./assets/*.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Windows Artifact
-        if: matrix.os == 'windows-latest'
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/${{ env.RELEASE_DIR }}/${{ env.RELEASE_DIR }}.exe
-          asset_name: tts-vue-windows-latest.exe
-          asset_content_type: application/octet-stream
-
-      - name: Upload Mac Artifact
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/${{ env.RELEASE_DIR }}/${{ env.RELEASE_DIR }}.dmg
-          asset_name: tts-vue-macos-latest.dmg
-          asset_content_type: application/octet-stream
-
-      - name: Upload Linux Artifact
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/${{ env.RELEASE_DIR }}/tts-vue-${{ env.RELEASE_DIR }}.AppImage
-          asset_name: tts-vue-linux-latest.AppImage
-          asset_content_type: application/octet-stream
