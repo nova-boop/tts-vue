@@ -42,6 +42,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: List Release Directory
+        run: ls -R release
+
       - name: Get Release Directory Name
         id: get_release_dir
         run: |
