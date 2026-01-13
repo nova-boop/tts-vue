@@ -48,7 +48,8 @@ jobs:
       - name: Get Release Directory Name
         id: get_release_dir
         run: |
-          echo "RELEASE_DIR=$(basename $(ls -d release/*))" >> $GITHUB_ENV  # 提取目录名称并设置环境变量
+          echo "RELEASE_DIR=$(basename $(ls -d release/*))" >> $GITHUB_ENV
+          cat ${{ env.RELEASE_DIR }}
 
       - name: Create Release
         id: create_release
@@ -66,8 +67,8 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/*/*.exe
-          asset_name: tts-vue-windows.exe
+          asset_path: release/${{ env.RELEASE_DIR }}/*.exe
+          asset_name: tts-vue-windows-latest.exe
           asset_content_type: application/octet-stream
 
       - name: Upload Mac Artifact
@@ -75,8 +76,8 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/*/*.dmg
-          asset_name: tts-vue-macos.dmg
+          asset_path: release/${{ env.RELEASE_DIR }}/*.dmg
+          asset_name: tts-vue-macos-latest.dmg
           asset_content_type: application/octet-stream
 
       - name: Upload Linux Artifact
@@ -84,6 +85,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/*/*.AppImage
-          asset_name: tts-vue-linux.AppImage
+          asset_path: release/${{ env.RELEASE_DIR }}/*.AppImage
+          asset_name: tts-vue-linux-latest.AppImage
           asset_content_type: application/octet-stream
