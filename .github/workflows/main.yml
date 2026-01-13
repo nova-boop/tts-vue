@@ -88,10 +88,11 @@ jobs:
             TTS-VUE 自动构建版本：${{ needs.build.outputs.release_version }}
             
             ### 🌟 致谢与声明
-                  本项目 Fork 自 [LokerL/tts-vue](https://github.com/LokerL/tts-vue)，感谢原作者的优秀作品。
-                  - **原项目地址**: https://github.com/LokerL/tts-vue
-                  - **构建类型**: 自动化多平台构建
+            本项目 Fork 自 [LokerL/tts-vue](https://github.com/LokerL/tts-vue)，感谢原作者的优秀作品。
+            - **原项目地址**: https://github.com/LokerL/tts-vue
+            - **构建类型**: 自动化多平台构建
             
+            ---
             ### 📦 包含平台
             - Windows (.exe)
             - macOS (.dmg)
@@ -100,7 +101,7 @@ jobs:
             ### 🛠 构建信息
             - **Build ID:** `${{ github.run_id }}`
             - **Commit:** `${{ github.sha }}`
-            - **构建时间:** ${{ github.event.head_commit.timestamp }}
+            - **Build Time:** ${{ github.event.head_commit.timestamp }}
             
             > 此 Release 由 GitHub Actions 自动生成。
           # ---------------------------------------------------------
